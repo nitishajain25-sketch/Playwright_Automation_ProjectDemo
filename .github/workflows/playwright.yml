@@ -1,27 +1,350 @@
+# ============================================================
+# GitHub Actions - Playwright Automated Testing
+# ============================================================
+#
+# This workflow will:
+# 1. Run whenever code is pushed to main/master
+# 2. Run whenever a Pull Request targets main/master
+# 3. Use Node.js 22
+# 4. Install project dependencies
+# 5. Install Playwright browsers and system dependencies
+# 6. Execute all Playwright tests
+# 7. Upload the Playwright HTML report
+#
+# ============================================================
+
+
+# ------------------------------------------------------------
+# WORKFLOW NAME
+# ------------------------------------------------------------
+# This is the name that will appear in:
+# GitHub → Actions
+# ------------------------------------------------------------
+
 name: Playwright Tests
+
+
+# ------------------------------------------------------------
+# WHEN SHOULD THIS WORKFLOW RUN?
+# ------------------------------------------------------------
+#
+# push:
+#   Runs the workflow whenever code is pushed to main/master.
+#
+# pull_request:
+#   Runs the workflow when a Pull Request is created or updated
+#   against main/master.
+#
+# ------------------------------------------------------------
+
 on:
+
+  # Run tests when code is pushed
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+
+  # Run tests for Pull Requests
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+
+
+# ------------------------------------------------------------
+# JOBS
+# ------------------------------------------------------------
+#
+# A workflow can contain multiple jobs.
+# Here we have one job called "test".
+#
+# ------------------------------------------------------------
+
 jobs:
+
   test:
+
+    # --------------------------------------------------------
+    # Maximum time allowed for this job
+    # --------------------------------------------------------
+    #
+    # If the test hangs for more than 60 minutes,
+    # GitHub Actions will automatically stop it.
+    #
     timeout-minutes: 60
+
+
+    # --------------------------------------------------------
+    # OPERATING SYSTEM
+    # --------------------------------------------------------
+    #
+    # GitHub provides a fresh Ubuntu machine for this job.
+    #
+    # ubuntu-latest currently provides a modern Ubuntu
+    # environment suitable for Playwright.
+    #
     runs-on: ubuntu-latest
+
+
+    # ========================================================
+    # STEPS
+    # ========================================================
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+
+
+      # ------------------------------------------------------
+      # STEP 1: CHECKOUT SOURCE CODE
+      # ------------------------------------------------------
+      #
+      # This downloads your GitHub repository code into
+      # the GitHub Actions runner.
+      #
+      # Without this step, GitHub Actions won't have access
+      # to your Playwright tests, package.json, etc.
+      #
+      # ------------------------------------------------------
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ------------------------------------------------------
+      # STEP 2: INSTALL NODE.JS
+      # ------------------------------------------------------
+      #
+      # IMPORTANT:
+      #
+      # Your previous workflow was using:
+      #
+      #     node-version: 18
+      #
+      # But your Playwright version requires:
+      #
+      #     Node.js >= 20
+      #
+      # Therefore we are using Node.js 22.
+      #
+      # Node.js 22 is a modern LTS version and is suitable
+      # for current Playwright projects.
+      #
+      # cache: npm
+      #
+      # This enables npm dependency caching and can make
+      # subsequent workflow runs faster.
+      #
+      # ------------------------------------------------------
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+
+      # ------------------------------------------------------
+      # STEP 3: VERIFY NODE AND NPM VERSION
+      # ------------------------------------------------------
+      #
+      # This is useful for debugging.
+      #
+      # GitHub Actions logs will show something like:
+      #
+      #     node v22.x.x
+      #     npm 10.x.x
+      #
+      # This also confirms that GitHub did NOT accidentally
+      # use Node.js 18.
+      #
+      # ------------------------------------------------------
+
+      - name: Check Node.js and npm versions
+        run: |
+          echo "========================================"
+          echo "Node.js Version"
+          echo "========================================"
+          node --version
+
+          echo ""
+          echo "========================================"
+          echo "npm Version"
+          echo "========================================"
+          npm --version
+
+          echo ""
+          echo "========================================"
+          echo "Current Directory"
+          echo "========================================"
+          pwd
+
+
+      # ------------------------------------------------------
+      # STEP 4: INSTALL PROJECT DEPENDENCIES
+      # ------------------------------------------------------
+      #
+      # npm ci is recommended for CI/CD environments.
+      #
+      # It uses package-lock.json and installs the exact
+      # dependency versions specified there.
+      #
+      # IMPORTANT:
+      #
+      # Your repository should contain:
+      #
+      #     package.json
+      #     package-lock.json
+      #
+      # If package-lock.json is missing, npm ci will fail.
+      #
+      # ------------------------------------------------------
+
+      - name: Install project dependencies
+        run: |
+          echo "Installing npm dependencies..."
+          npm ci
+
+
+      # ------------------------------------------------------
+      # STEP 5: INSTALL PLAYWRIGHT BROWSERS
+      # ------------------------------------------------------
+      #
+      # Playwright requires browsers such as:
+      #
+      #     Chromium
+      #     Firefox
+      #     WebKit
+      #
+      # --with-deps also installs required Linux system
+      # dependencies needed by the browsers.
+      #
+      # This is especially important on GitHub's Ubuntu runner.
+      #
+      # ------------------------------------------------------
+
+      - name: Install Playwright browsers and dependencies
+        run: |
+          echo "Installing Playwright browsers..."
+          npx playwright install --with-deps
+
+
+      # ------------------------------------------------------
+      # STEP 6: VERIFY PLAYWRIGHT INSTALLATION
+      # ------------------------------------------------------
+      #
+      # This step prints the installed Playwright version.
+      #
+      # It is useful when troubleshooting version-related
+      # problems.
+      #
+      # ------------------------------------------------------
+
+      - name: Check Playwright version
+        run: |
+          echo "========================================"
+          echo "Playwright Version"
+          echo "========================================"
+
+          npx playwright --version
+
+
+      # ------------------------------------------------------
+      # STEP 7: RUN PLAYWRIGHT TESTS
+      # ------------------------------------------------------
+      #
+      # This is the actual test execution step.
+      #
+      # Playwright will read your configuration from:
+      #
+      #     playwright.config.ts
+      #
+      # or:
+      #
+      #     playwright.config.js
+      #
+      # depending on your project.
+      #
+      # ------------------------------------------------------
+
+      - name: Run Playwright tests
+        run: |
+          echo "========================================"
+          echo "Running Playwright Tests"
+          echo "========================================"
+
+          npx playwright test
+
+
+      # ------------------------------------------------------
+      # STEP 8: UPLOAD PLAYWRIGHT HTML REPORT
+      # ------------------------------------------------------
+      #
+      # Playwright normally creates the HTML report inside:
+      #
+      #     playwright-report/
+      #
+      # We upload this folder to GitHub Actions as an artifact.
+      #
+      # IMPORTANT:
+      #
+      # if: always()
+      #
+      # means this step will execute even when the tests fail.
+      #
+      # This is very useful because you can inspect the report
+      # when a test fails.
+      #
+      # ------------------------------------------------------
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+
+        # Upload report even when tests fail
+        if: always()
+
+        with:
+
+          # Name shown in GitHub Actions
+          name: playwright-report
+
+          # Folder containing Playwright HTML report
+          path: playwright-report/
+
+          # Keep report for 30 days
+          retention-days: 30
+
+
+      # ------------------------------------------------------
+      # STEP 9: UPLOAD TEST RESULTS
+      # ------------------------------------------------------
+      #
+      # If your Playwright configuration generates:
+      #
+      #     test-results/
+      #
+      # this step uploads screenshots, videos, traces,
+      # and other test artifacts.
+      #
+      # This is extremely useful for debugging failed tests.
+      #
+      # ------------------------------------------------------
+
+      - name: Upload Playwright test results
+        uses: actions/upload-artifact@v4
+
+        # Upload even if tests fail
+        if: always()
+
+        with:
+
+          # Artifact name
+          name: playwright-test-results
+
+          # Playwright test results directory
+          path: test-results/
+
+          # Keep results for 30 days
+          retention-days: 30
+
+          # Do not fail workflow if directory doesn't exist
+          if-no-files-found: ignore
