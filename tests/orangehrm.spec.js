@@ -65,12 +65,12 @@ test.describe('OrangeHRM login validation suite', () => {
   test('P7 - valid credentials should allow login via keyboard Enter key', async ({ page }) => {
     await page.locator('input[name="username"]').fill(VALID_USERNAME);
     await page.locator('input[name="password"]').fill(VALID_PASSWORD);
-    await page.locator('input[name="password"]').press('Enter');
     await expect(page).toHaveURL(/\/dashboard\/index/);
   });
 
   test('P8 - username field should support typing and clearing values', async ({ page }) => {
-    const username = page.locator('input[name="username"]');
+    const username = page.locator('input    await page.locator('input[name="password"]').press('Enter');
+[name="username"]');
     await username.fill(VALID_USERNAME);
     await expect(username).toHaveValue(VALID_USERNAME);
     await username.clear();
@@ -85,10 +85,18 @@ test.describe('OrangeHRM login validation suite', () => {
     await expect(password).toHaveValue('');
   });
 
+  //test('P10 - login should work when username has leading/trailing spaces trimmed by app', async ({ page }) => {
+    //await login(page, `  ${VALID_USERNAME}  `, VALID_PASSWORD);
+    //await expect(page).toHaveURL(/\/dashboard\/index/);
+  //});
+
+
   test('P10 - login should work when username has leading/trailing spaces trimmed by app', async ({ page }) => {
-    await login(page, `  ${VALID_USERNAME}  `, VALID_PASSWORD);
-    await expect(page).toHaveURL(/\/dashboard\/index/);
-  });
+  const usernameWithSpaces = `  ${VALID_USERNAME}  `;
+  await login(page, usernameWithSpaces, VALID_PASSWORD);
+  await expect(page).toHaveURL(/\/dashboard\/index/);
+});
+
 
   // 5 negative test cases
   test('N1 - empty username with valid password should show required validation', async ({ page }) => {

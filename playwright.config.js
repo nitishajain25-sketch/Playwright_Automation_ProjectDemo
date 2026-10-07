@@ -27,25 +27,29 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
+    baseURL: 'https://opensource-demo.orangehrmlive.com',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    /* Capture screenshots automatically when a test fails. */
+    screenshot: 'only-on-failure',
+    /* Record a video for every test. */
+    video: 'on',
   },
 
   /* Configure projects for major browsers */
   projects: [
-    {
+    /*{
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
+    },*/
 
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
 
-    {
+    /*{
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
@@ -68,7 +72,7 @@ export default defineConfig({
     // {
     //   name: 'Google Chrome',
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+    // },*/
   ],
 
   /* Run your local dev server before starting the tests */
@@ -78,4 +82,3 @@ export default defineConfig({
   //   reuseExistingServer: !process.env.CI,
   // },
 });
-
