@@ -69,8 +69,7 @@ test.describe('OrangeHRM login validation suite', () => {
   });
 
   test('P8 - username field should support typing and clearing values', async ({ page }) => {
-    const username = page.locator('input    await page.locator('input[name="password"]').press('Enter');
-[name="username"]');
+    const username = page.locator('input[name="username"]');
     await username.fill(VALID_USERNAME);
     await expect(username).toHaveValue(VALID_USERNAME);
     await username.clear();
@@ -135,5 +134,14 @@ test.describe('OrangeHRM login validation suite', () => {
 
     await expect(page.locator('.oxd-alert-content-text')).toContainText(/Invalid credentials|Login failed|Oops/i);
   });
+
+  test.afterEach(async ({ page }, testInfo) => {
+  if (testInfo.status !== testInfo.expectedStatus) {
+    await page.screenshot({
+      path: testInfo.outputPath('failure.png'),
+      fullPage: true,
+    });
+  }
+});
 
 });
